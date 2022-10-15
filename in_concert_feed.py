@@ -5,7 +5,7 @@ latest_shows_scraper = __import__('latest_shows_scraper')
 
 def GetInConcertFeed(rss_file=None, atom_file=None):
     fg = FeedGenerator()
-    link = "https://www.classicalwcrb.org/show/upcoming-in-concert-broadcasts#previous-and-on-demand-episodes"
+    link = "https://www.classicalwcrb.org/show/upcoming-in-concert-broadcasts"
     fg.id(link)
     fg.link(href=link)
     fg.load_extension('podcast')
