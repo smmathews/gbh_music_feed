@@ -1,7 +1,7 @@
 from pathlib import Path
 from feedgen.feed import FeedGenerator
 
-latet_show_scraper = __import__('latest_shows_scraper')
+latest_shows_scraper = __import__('latest_shows_scraper')
 
 def GetShowFeed(show, rss_file=None, atom_file=None):
     fg = FeedGenerator()
@@ -14,7 +14,7 @@ def GetShowFeed(show, rss_file=None, atom_file=None):
     fg.language('en')
     fg.description("Feed is not affiliated with GBH/WGBH in any way. All content is copyright GBH/WGBH, and should be enjoyed just as you would streaming the show directly from their website. Please donate to donate.wgbh.org for more of the shows you love.")
     
-    for download in latet_show_scraper.GetShowDownloads(show):
+    for download in latest_shows_scraper.GetShowDownloads(show):
         fe = fg.add_entry()
         fe.id(download["href"])
         fe.link(href=download["href"])
@@ -31,3 +31,8 @@ def GetShowFeed(show, rss_file=None, atom_file=None):
         fg.rss_file(rss_file) # Write the RSS feed to a file
 
     return fg.atom_str(pretty=True); # Get the ATOM feed as string
+
+
+if __name__ == '__main__':
+    GetShowFeed(latest_shows_scraper.shows["jazz"]["jazz-on-89-7"], atom_file="feeds/jazz_89_7_latest_atom.xml", rss_file="feeds/jazz_89_7_latest_rss.xml")
+    
