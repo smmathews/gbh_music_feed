@@ -1,10 +1,9 @@
 import requests, re
 from bs4 import BeautifulSoup
 
-def GetJazz897Links():
+def GetGBHLinks(link):
     with requests.Session() as session:
         session.headers.update({'User-Agent': 'Custom user agent'})
-        link = "https://www.wgbh.org/music/jazz/jazz-on-89-7"
         clazz = "LinksListItem Link"
         html_text = session.get(link).text
         soup = BeautifulSoup(html_text, 'html.parser')
@@ -16,8 +15,8 @@ def GetJazz897Links():
             performances.append({'title':title, 'href':href, 'pretty_date':pretty_date})
         return performances
 
-def GetJazz897Downloads():
-    performances = GetJazz897Links()
+def GetGBHDownloads(link):
+    performances = GetGBHLinks(link)
     for performance in performances:
         with requests.Session() as session:
             session.headers.update({'User-Agent': 'Custom user agent'})
@@ -31,10 +30,9 @@ def GetJazz897Downloads():
     return performances
 
 
-def GetInConcertDownloads():
+def GetCRBDownloads(link):
     with requests.Session() as session:
         session.headers.update({'User-Agent': 'Custom user agent'})
-        link = "https://www.classicalwcrb.org/show/upcoming-in-concert-broadcasts#previous-and-on-demand-episodes"
         html_text = session.get(link).text
         soup = BeautifulSoup(html_text, 'html.parser')
         performances = []
@@ -45,6 +43,5 @@ def GetInConcertDownloads():
                 title = performance.find('a', attrs={"class":"Link"})['aria-label']
                 href = performance.find('a', attrs={"class":"Link"})['href']
                 logo = performance.find_all('source')[1]['data-srcset']
-                print(logo)
                 performances.append({'title':title, 'href':href, 'download':download, 'logo':logo})
         return performances

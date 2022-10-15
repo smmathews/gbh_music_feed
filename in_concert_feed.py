@@ -5,16 +5,17 @@ latest_shows_scraper = __import__('latest_shows_scraper')
 
 def GetInConcertFeed(rss_file=None, atom_file=None):
     fg = FeedGenerator()
-    fg.id("https://www.classicalwcrb.org/show/upcoming-in-concert-broadcasts#previous-and-on-demand-episodes")
-    fg.link(href="https://www.classicalwcrb.org/show/upcoming-in-concert-broadcasts#previous-and-on-demand-episodes")
+    link = "https://www.classicalwcrb.org/show/upcoming-in-concert-broadcasts#previous-and-on-demand-episodes"
+    fg.id(link)
+    fg.link(href=link)
     fg.load_extension('podcast')
     fg.title("WCRB In Concert")
     fg.logo('https://wgbh.brightspotcdn.com/2c/c4/dcae41df41c59226cc785e7740bd/wgbh-logo.svg')# GBH logo. TODO: get logo from show
     fg.subtitle('')
     fg.language('en')
-    fg.description("Feed is not affiliated with WCRB/GBH/WGBH in any way. All content is copyright WCRB/GBH/WGBH, and should be enjoyed just as you would streaming the show directly from their website. Please donate to donate.wgbh.org for more of the shows you love.")
+    fg.description("Feed is not affiliated with CRB/GBH in any way. All content is copyright CRB/GBH, and should be enjoyed just as you would streaming the show directly from their website. Please donate to https://donate.wgbh.org/wgbh/wcrb-donate to support the shows you love.")
     
-    for download in latest_shows_scraper.GetInConcertDownloads():
+    for download in latest_shows_scraper.GetCRBDownloads(link):
         fe = fg.add_entry()
         fe.podcast.itunes_image(download["logo"])
         fe.id(download["href"])
