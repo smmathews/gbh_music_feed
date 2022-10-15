@@ -1,6 +1,6 @@
 # gbh_music_feed
 
-THIS PROJECT IS NOT AFFILIATED WITH GBH/WGBH IN ANY WAY. All scraped content is copyright GBH/WGBH, and should be enjoyed just as you would streaming the show directly from their website. Please donate to donate.wgbh.org for more of the shows you love.
+THIS PROJECT IS NOT AFFILIATED WITH GBH/WGBH IN ANY WAY. All scraped content is copyright GBH/WGBH, and should be enjoyed just as you would streaming the show directly from their website. Please [donate to GBH](http://donate.wgbh.org) for more of the shows you love.
 
 I got sick of only being able to access the latest GBH Jazz episodes on a browser, and would much rather use Podcast Addict to check for new episodes automatically. So I created a simple python scraper. Every four hours my raspberry pi scrapes the latest episode metadata, creates an rss and atom feed file, and pushes that file to my private s3 bucket (feeds I use are made public).
 
