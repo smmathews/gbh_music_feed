@@ -16,6 +16,7 @@ def GetInConcertFeed(rss_file=None, atom_file=None):
     
     for download in latest_shows_scraper.GetInConcertDownloads():
         fe = fg.add_entry()
+        fe.podcast.itunes_image(download["logo"])
         fe.id(download["href"])
         fe.link(href=download["href"])
         fe.title(download["title"])

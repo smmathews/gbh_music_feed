@@ -10,6 +10,7 @@ class TestFunction(unittest.TestCase):
             self.assertTrue(show["title"])
             self.assertTrue(show["href"].startswith("https://www.classicalwcrb.org"))
             self.assertTrue(show["download"].endswith(".mp3"))
+            self.assertTrue(show["logo"].endswith(".jpg"))
 
     def test_jazz_89_7(self):
         result = latest_shows_scraper.GetJazz897Downloads()
