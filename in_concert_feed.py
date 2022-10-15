@@ -11,7 +11,7 @@ def GetInConcertFeed(rss_file=None, atom_file=None):
     fg.load_extension('podcast')
     fg.title("WCRB In Concert")
     fg.logo('https://wgbh.brightspotcdn.com/2c/c4/dcae41df41c59226cc785e7740bd/wgbh-logo.svg')# GBH logo. TODO: get logo from show
-    fg.subtitle('')
+    fg.subtitle('In Concert captures the wealth of incredible music being performed in and around the Boston area, from the Handel and Haydn Society to A Far Cry, from the Gardner Museum to Rockport Music, and beyond. See a full list of broadcast partners here: https://www.classicalwcrb.org/in-concert-broadcast-partners.')# TODO: scrape this, in case it changes
     fg.language('en')
     fg.description("Feed is not affiliated with CRB/GBH in any way. All content is copyright CRB/GBH, and should be enjoyed just as you would streaming the show directly from their website. Please donate to https://donate.wgbh.org/wgbh/wcrb-donate to support the shows you love.")
     
