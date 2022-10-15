@@ -3,18 +3,18 @@ from feedgen.feed import FeedGenerator
 
 latest_shows_scraper = __import__('latest_shows_scraper')
 
-def GetShowFeed(show, rss_file=None, atom_file=None):
+def GetJazzFeed(rss_file=None, atom_file=None):
     fg = FeedGenerator()
-    fg.id(show["link"])
-    fg.link(href=show["link"])
+    fg.id("https://www.wgbh.org/music/jazz/jazz-on-89-7")
+    fg.link(href="https://www.wgbh.org/music/jazz/jazz-on-89-7")
     fg.load_extension('podcast')
-    fg.title(show["title"])
+    fg.title("GBH Jazz on 89.7")
     fg.logo('https://wgbh.brightspotcdn.com/2c/c4/dcae41df41c59226cc785e7740bd/wgbh-logo.svg')# GBH logo. TODO: get logo from show
     fg.subtitle('')
     fg.language('en')
     fg.description("Feed is not affiliated with GBH/WGBH in any way. All content is copyright GBH/WGBH, and should be enjoyed just as you would streaming the show directly from their website. Please donate to donate.wgbh.org for more of the shows you love.")
     
-    for download in latest_shows_scraper.GetShowDownloads(show):
+    for download in latest_shows_scraper.GetJazz897Downloads():
         fe = fg.add_entry()
         fe.id(download["href"])
         fe.link(href=download["href"])

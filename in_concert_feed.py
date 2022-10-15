@@ -3,18 +3,18 @@ from feedgen.feed import FeedGenerator
 
 latest_shows_scraper = __import__('latest_shows_scraper')
 
-def GetShowFeed(show, rss_file=None, atom_file=None):
+def GetInConcertFeed(rss_file=None, atom_file=None):
     fg = FeedGenerator()
-    fg.id(show["link"])
-    fg.link(href=show["link"])
+    fg.id("https://www.classicalwcrb.org/show/upcoming-in-concert-broadcasts#previous-and-on-demand-episodes")
+    fg.link(href="https://www.classicalwcrb.org/show/upcoming-in-concert-broadcasts#previous-and-on-demand-episodes")
     fg.load_extension('podcast')
-    fg.title(show["title"])
+    fg.title("WCRB In Conert")
     fg.logo('https://wgbh.brightspotcdn.com/2c/c4/dcae41df41c59226cc785e7740bd/wgbh-logo.svg')# GBH logo. TODO: get logo from show
     fg.subtitle('')
     fg.language('en')
-    fg.description("Feed is not affiliated with GBH/WGBH in any way. All content is copyright GBH/WGBH, and should be enjoyed just as you would streaming the show directly from their website. Please donate to donate.wgbh.org for more of the shows you love.")
+    fg.description("Feed is not affiliated with WCRB/GBH/WGBH in any way. All content is copyright WCRB/GBH/WGBH, and should be enjoyed just as you would streaming the show directly from their website. Please donate to donate.wgbh.org for more of the shows you love.")
     
-    for download in latest_shows_scraper.GetShowDownloads(show):
+    for download in latest_shows_scraper.GetInConcertDownloads():
         fe = fg.add_entry()
         fe.id(download["href"])
         fe.link(href=download["href"])
@@ -34,5 +34,5 @@ def GetShowFeed(show, rss_file=None, atom_file=None):
 
 
 if __name__ == '__main__':
-    GetShowFeed(latest_shows_scraper.shows["jazz"]["jazz-on-89-7"], atom_file="feeds/jazz_89_7_latest_atom.xml", rss_file="feeds/jazz_89_7_latest_rss.xml")
+    GetInConcertFeed(atom_file="feeds/in_concert_latest_atom.xml", rss_file="feeds/in_concert_latest_rss.xml")
     

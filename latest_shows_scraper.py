@@ -1,12 +1,6 @@
 import requests, re
 from bs4 import BeautifulSoup
 
-shows = {
-    "jazz":{
-        "jazz-on-89-7":{"link":"https://www.wgbh.org/music/jazz/jazz-on-89-7","class":"LinksListItem Link"}
-    }
-}
-
 def GetJazz897Links():
     with requests.Session() as session:
         session.headers.update({'User-Agent': 'Custom user agent'})
@@ -41,7 +35,6 @@ def GetInConcertDownloads():
     with requests.Session() as session:
         session.headers.update({'User-Agent': 'Custom user agent'})
         link = "https://www.classicalwcrb.org/show/upcoming-in-concert-broadcasts#previous-and-on-demand-episodes"
-        clazz = "ps-stream-url"
         html_text = session.get(link).text
         soup = BeautifulSoup(html_text, 'html.parser')
         performances = []
