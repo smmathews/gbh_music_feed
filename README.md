@@ -12,4 +12,8 @@ If you want a public classical in-concert feed, add this to your podcast app:
   - RSS: https://gbh-feed.s3.us-west-2.amazonaws.com/in_concert_latest_rss.xml
   - ATOM: https://gbh-feed.s3.us-west-2.amazonaws.com/in_concert_latest_atom.xml
 
+If you want a public boston symphony orchest feed, add this to your podcast app:
+  - RSS: https://gbh-feed.s3.us-west-2.amazonaws.com/bso_latest_rss.xml
+  - ATOM: https://gbh-feed.s3.us-west-2.amazonaws.com/bso_latest_atom.xml
+
 So far these are the only feeds I've tested and am actively using. I may add more in the future.
