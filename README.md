@@ -8,4 +8,8 @@ If you want a public jazz feed, add this to your podcast app:
   - RSS: https://gbh-feed.s3.us-west-2.amazonaws.com/jazz_89_7_latest_rss.xml
   - ATOM: https://gbh-feed.s3.us-west-2.amazonaws.com/jazz_89_7_latest_atom.xml
 
+If you want a public class in-concert feed, add this to your podcast app:
+RSS: https://gbh-feed.s3.us-west-2.amazonaws.com/in_concert_latest_rss.xml
+ATOM: https://gbh-feed.s3.us-west-2.amazonaws.com/in_concert_latest_atom.xml
+
 So far that is the first and only feed I've tested and am actively using. I may add more in the future.

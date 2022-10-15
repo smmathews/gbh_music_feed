@@ -34,5 +34,5 @@ def GetJazzFeed(rss_file=None, atom_file=None):
 
 
 if __name__ == '__main__':
-    GetShowFeed(latest_shows_scraper.shows["jazz"]["jazz-on-89-7"], atom_file="feeds/jazz_89_7_latest_atom.xml", rss_file="feeds/jazz_89_7_latest_rss.xml")
+    GetJazzFeed(atom_file="feeds/jazz_89_7_latest_atom.xml", rss_file="feeds/jazz_89_7_latest_rss.xml")
     
