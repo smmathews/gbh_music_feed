@@ -8,7 +8,7 @@ def GetInConcertFeed(rss_file=None, atom_file=None):
     fg.id("https://www.classicalwcrb.org/show/upcoming-in-concert-broadcasts#previous-and-on-demand-episodes")
     fg.link(href="https://www.classicalwcrb.org/show/upcoming-in-concert-broadcasts#previous-and-on-demand-episodes")
     fg.load_extension('podcast')
-    fg.title("WCRB In Conert")
+    fg.title("WCRB In Concert")
     fg.logo('https://wgbh.brightspotcdn.com/2c/c4/dcae41df41c59226cc785e7740bd/wgbh-logo.svg')# GBH logo. TODO: get logo from show
     fg.subtitle('')
     fg.language('en')
