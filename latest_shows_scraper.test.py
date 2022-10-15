@@ -4,7 +4,7 @@ latest_shows_scraper = __import__('latest_shows_scraper')
 
 class TestFunction(unittest.TestCase):
     def test_classical_in_concert(self):
-        result = latest_shows_scraper.GetCRBDownloads("https://www.classicalwcrb.org/show/upcoming-in-concert-broadcasts#previous-and-on-demand-episodes")
+        result = latest_shows_scraper.GetCRBDownloads("https://www.classicalwcrb.org/show/upcoming-in-concert-broadcasts")
         self.assertTrue(len(result))
         for show in result:
             self.assertTrue(show["title"])
@@ -13,7 +13,7 @@ class TestFunction(unittest.TestCase):
             self.assertTrue(show["logo"].endswith(".jpg"))
 
     def test_bso(self):
-        result = latest_shows_scraper.GetCRBDownloads("https://www.classicalwcrb.org/show/the-boston-symphony-orchestra#previous-and-on-demand-broadcasts")
+        result = latest_shows_scraper.GetCRBDownloads("https://www.classicalwcrb.org/show/the-boston-symphony-orchestra")
         self.assertTrue(len(result))
         for show in result:
             self.assertTrue(show["title"])
