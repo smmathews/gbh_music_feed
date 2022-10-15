@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 
 shows = {
     "jazz":{
-        "jazz-on-89-7":{"link":"https://www.wgbh.org/music/jazz/jazz-on-89-7","class":"LinksListItem Link"}
+        "jazz-on-89-7":{"title":"GBH Jazz on 89.7","link":"https://www.wgbh.org/music/jazz/jazz-on-89-7","class":"LinksListItem Link"}
     }
 }
 
