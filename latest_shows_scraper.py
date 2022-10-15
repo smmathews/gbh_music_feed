@@ -3,16 +3,15 @@ from bs4 import BeautifulSoup
 
 shows = {
     "jazz":{
-        "jazz-on-89-7":{"title":"GBH Jazz on 89.7","link":"https://www.wgbh.org/music/jazz/jazz-on-89-7","class":"LinksListItem Link"}
+        "jazz-on-89-7":{"link":"https://www.wgbh.org/music/jazz/jazz-on-89-7","class":"LinksListItem Link"}
     }
 }
 
-def GetShowLinks(show):
+def GetJazz897Links():
     with requests.Session() as session:
         session.headers.update({'User-Agent': 'Custom user agent'})
-        link = show["link"]
-        #cached_text_link = "http://webcache.googleusercontent.com/search?q=cache:" + link + "&strip=1&vwsrc=0"
-        clazz = show["class"]
+        link = "https://www.wgbh.org/music/jazz/jazz-on-89-7"
+        clazz = "LinksListItem Link"
         html_text = session.get(link).text
         soup = BeautifulSoup(html_text, 'html.parser')
         performances = []
@@ -23,8 +22,8 @@ def GetShowLinks(show):
             performances.append({'title':title, 'href':href, 'pretty_date':pretty_date})
         return performances
 
-def GetShowDownloads(show):
-    performances = GetShowLinks(show)
+def GetJazz897Downloads():
+    performances = GetJazz897Links()
     for performance in performances:
         with requests.Session() as session:
             session.headers.update({'User-Agent': 'Custom user agent'})
@@ -33,7 +32,37 @@ def GetShowDownloads(show):
             download = soup.find('button', attrs={"data-title":performance["title"]})
             if not download:
                 download = soup.find('button', attrs={"data-title":re.compile('.*'+performance["pretty_date"]+'.*')})
-            
+            if download:
+                performance.update({'download':download.attrs["data-src"]})
+    return performances
+
+
+def GetInConcertDownloads():
+    with requests.Session() as session:
+        session.headers.update({'User-Agent': 'Custom user agent'})
+        link = "https://www.classicalwcrb.org/show/upcoming-in-concert-broadcasts#previous-and-on-demand-episodes"
+        clazz = "ps-stream-url"
+        html_text = session.get(link).text
+        soup = BeautifulSoup(html_text, 'html.parser')
+        performances = []
+        for performance in soup.find_all('ps-promo', attrs={"data-content-type":"episodic-radio-episode"}):
+            download = performance.find('ps-stream-url', attrs={"data-stream-format":"audio/mpeg"})
+            if download:
+                download = download['data-stream-url']
+                title = performance.find('a', attrs={"class":"Link"})['aria-label']
+                href = performance.find('a', attrs={"class":"Link"})['href']
+                performances.append({'title':title, 'href':href, 'download':download})
+        return performances
+
+    performances = GetJazzDownloads()
+    for performance in performances:
+        with requests.Session() as session:
+            session.headers.update({'User-Agent': 'Custom user agent'})
+            html_text = session.get(performance["href"]).text
+            soup = BeautifulSoup(html_text, 'html.parser')
+            download = soup.find('button', attrs={"data-title":performance["title"]})
+            if not download:
+                download = soup.find('button', attrs={"data-title":re.compile('.*'+performance["pretty_date"]+'.*')})
             if download:
                 performance.update({'download':download.attrs["data-src"]})
     return performances
