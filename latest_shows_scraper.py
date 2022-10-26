@@ -24,7 +24,7 @@ def GetGBHDownloads(link):
             soup = BeautifulSoup(html_text, 'html.parser')
             download = soup.find('button', attrs={"data-title":performance["title"]})
             if not download:
-                download = soup.find('button', attrs={"data-title":re.compile('.*'+performance["pretty_date"]+'.*')})
+                download = soup.find('button', attrs={"data-src":re.compile('.*mp3')})
             if download:
                 performance.update({'download':download.attrs["data-src"]})
     return performances
