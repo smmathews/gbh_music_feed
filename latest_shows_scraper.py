@@ -8,7 +8,7 @@ def GetGBHShowInfo(link):
         html_text = session.get(link).text
         soup = BeautifulSoup(html_text, 'html.parser')
         img = soup.find('div', attrs={"class":clazz}).find('img')
-        return {"image":img.attrs["src"], "subtitle":img.attrs["alt"]}
+        return {"image":img.attrs["src"], "title":img.attrs["alt"]}
 
 def GetGBHLinks(link):
     with requests.Session() as session:
