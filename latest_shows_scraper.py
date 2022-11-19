@@ -1,6 +1,15 @@
 import requests, re
 from bs4 import BeautifulSoup
 
+def GetGBHShowInfo(link):
+    with requests.Session() as session:
+        session.headers.update({'User-Agent': 'Custom user agent'})
+        clazz = "BannerPromoImage"
+        html_text = session.get(link).text
+        soup = BeautifulSoup(html_text, 'html.parser')
+        img = soup.find('div', attrs={"class":clazz}).find('img')
+        return {"image":img.attrs["src"], "subtitle":img.attrs["alt"]}
+
 def GetGBHLinks(link):
     with requests.Session() as session:
         session.headers.update({'User-Agent': 'Custom user agent'})

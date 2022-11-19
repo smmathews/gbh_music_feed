@@ -9,9 +9,9 @@ def GetJazzFeed(rss_file=None, atom_file=None):
     fg.id(link)
     fg.link(href=link)
     fg.load_extension('podcast')
-    fg.title("GBH Jazz on 89.7")
-    fg.logo('https://wgbh.brightspotcdn.com/2c/c4/dcae41df41c59226cc785e7740bd/wgbh-logo.svg')# GBH logo. TODO: get logo from show
-    fg.subtitle('')
+    info = latest_shows_scraper.GetGBHShowInfo(link)
+    fg.logo(info["image"])
+    fg.title(info["title"])
     fg.language('en')
     fg.description("Feed is not affiliated with GBH in any way. All content is copyright GBH, and should be enjoyed just as you would streaming the show directly from their website. Please donate to https://donate.wgbh.org/wgbh/radio-pledge to support the shows you love.")
     
