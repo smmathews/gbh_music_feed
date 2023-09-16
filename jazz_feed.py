@@ -5,7 +5,7 @@ latest_shows_scraper = __import__('latest_shows_scraper')
 
 def GetJazzFeed(rss_file=None, atom_file=None):
     fg = FeedGenerator()
-    link = "https://www.wgbh.org/music/jazz/jazz-on-89-7"
+    link = "https://www.wgbh.org/shows/gbh-musics-jazz-on-89-7"
     fg.id(link)
     fg.link(href=link)
     fg.load_extension('podcast')
