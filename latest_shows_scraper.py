@@ -4,22 +4,26 @@ from bs4 import BeautifulSoup
 def GetGBHShowInfo(link):
     with requests.Session() as session:
         session.headers.update({'User-Agent': 'Custom user agent'})
-        clazz = "BannerPromoImage"
+        clazz = "Image"
         html_text = session.get(link).text
         soup = BeautifulSoup(html_text, 'html.parser')
-        img = soup.find('div', attrs={"class":clazz}).find('img')
+        img = soup.find('img', attrs={"class":clazz})
         return {"image":img.attrs["src"], "title":img.attrs["alt"]}
 
 def GetGBHLinks(link):
     with requests.Session() as session:
         session.headers.update({'User-Agent': 'Custom user agent'})
-        clazz = "LinksListItem Link"
+        clazz = "title-link"
         html_text = session.get(link).text
         soup = BeautifulSoup(html_text, 'html.parser')
         performances = []
         for performance in soup.find_all('a', attrs={"class":clazz}):
-            title = performance.find('div').contents[0]
-            pretty_date = title.split(": ",1)[1]
+            title = performance.text
+            pretty_date = title
+            if ":" in title:
+                pretty_date = title.split(": ",1)[1]
+            else:
+                title = "GBH Music's Jazz on 89.7: " + pretty_date
             href = performance["href"]
             performances.append({'title':title, 'href':href, 'pretty_date':pretty_date})
         return performances
@@ -31,11 +35,12 @@ def GetGBHDownloads(link):
             session.headers.update({'User-Agent': 'Custom user agent'})
             html_text = session.get(performance["href"]).text
             soup = BeautifulSoup(html_text, 'html.parser')
-            download = soup.find('button', attrs={"data-title":performance["title"]})
-            if not download:
-                download = soup.find('button', attrs={"data-src":re.compile('.*mp3')})
+            download = soup.find('button', attrs={"data-stream-url":re.compile('.*mp3')})
             if download:
                 performance.update({'download':download.attrs["data-src"]})
+            else:
+                download = soup.find('ps-stream-url', attrs={"data-stream-url":re.compile('.*mp3')})
+                performance.update({'download':download.attrs["data-stream-url"]})
     return performances
 
 
