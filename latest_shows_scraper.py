@@ -53,9 +53,8 @@ def GetCRBDownloads(link):
         for performance in soup.find_all('ps-promo', attrs={"data-content-type":"episodic-radio-episode"}):
             download = performance.find('ps-stream-url', attrs={"data-stream-format":"audio/mpeg"})
             if download:
-                download = download['data-stream-url']
+                download = download.attrs["data-stream-url"]
                 title = performance.find('a', attrs={"class":"Link"})['aria-label']
                 href = performance.find('a', attrs={"class":"Link"})['href']
-                logo = performance.find_all('source')[1]['data-srcset']
-                performances.append({'title':title, 'href':href, 'download':download, 'logo':logo})
+                performances.append({'title':title, 'href':href, 'download':download})
         return performances

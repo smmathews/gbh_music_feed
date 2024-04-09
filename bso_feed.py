@@ -20,8 +20,6 @@ def GenerateConcertFeeds(rss_file=None, atom_file=None):
 
     for download in latest_shows_scraper.GetCRBDownloads(link):
         fe = fg.add_entry()
-        if download["logo"] and download["logo"].endswith(".png") or download["logo"].endswith(".jpg"):
-            fe.podcast.itunes_image(download["logo"])
         fe.id(download["href"])
         fe.link(href=download["href"])
         fe.title(download["title"])
