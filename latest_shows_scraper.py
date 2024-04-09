@@ -35,11 +35,11 @@ def GetGBHDownloads(link):
             session.headers.update({'User-Agent': 'Custom user agent'})
             html_text = session.get(performance["href"]).text
             soup = BeautifulSoup(html_text, 'html.parser')
-            download = soup.find('button', attrs={"data-stream-url":re.compile('.*mp3')})
+            download = soup.find('button', attrs={"data-stream-url":re.compile('.*cdn.*mp3')})
             if download:
                 performance.update({'download':download.attrs["data-src"]})
             else:
-                download = soup.find('ps-stream-url', attrs={"data-stream-url":re.compile('.*mp3')})
+                download = soup.find('ps-stream-url', attrs={"data-stream-url":re.compile('.*cdn.*mp3')})
                 performance.update({'download':download.attrs["data-stream-url"]})
     return performances
 
