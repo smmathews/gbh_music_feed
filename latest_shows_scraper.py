@@ -40,8 +40,11 @@ def GetGBHDownloads(link):
                 performance.update({'download':download.attrs["data-src"]})
             else:
                 download = soup.find('ps-stream-url', attrs={"data-stream-url":re.compile('.*cdn.*mp3')})
-                performance.update({'download':download.attrs["data-stream-url"]})
-    return performances
+                if download:
+                    performance.update({'download':download.attrs["data-stream-url"]})
+                else:
+                    performance.update({'download':False})
+    return [item for item in performances if item['download']]
 
 
 def GetCRBDownloads(link):
