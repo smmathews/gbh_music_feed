@@ -7,9 +7,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Web scraper and podcast feed generator for GBH/WCRB radio shows. Scrapes episode metadata from radio station websites, generates RSS/ATOM feed files, and uploads them to an S3 bucket. Runs on a Raspberry Pi via cron every 4 hours.
 
 Three feeds are generated:
-- **Jazz on 89.7** (`jazz_feed.py`) — scrapes GBH site using `GetGBHDownloads`
-- **WCRB In Concert** (`in_concert_feed.py`) — scrapes CRB site using `GetCRBDownloads`
-- **WCRB BSO** (`bso_feed.py`) — scrapes CRB site using `GetCRBDownloads`
+- **Jazz on 89.7** (`jazz_feed.py`) — scrapes GBH site using `get_gbh_downloads`
+- **WCRB In Concert** (`in_concert_feed.py`) — scrapes CRB site using `get_crb_downloads`
+- **WCRB BSO** (`bso_feed.py`) — scrapes CRB site using `get_crb_downloads`
 
 ## Commands
 
@@ -25,21 +25,25 @@ python3 bso_feed.py
 # Run all feeds and upload to S3
 ./runAndUpload.sh
 
-# Run tests (these hit live websites)
-python3 -m unittest latest_shows_scraper.test
-python3 -m unittest jazz_feed.test
-python3 -m unittest in_concert_feed.test
+# Run all tests (these hit live websites)
+python3 -m unittest discover
+
+# Run individual tests
+python3 -m unittest test_latest_shows_scraper
+python3 -m unittest test_jazz_feed
+python3 -m unittest test_in_concert_feed
 ```
 
 ## Architecture
 
 - `latest_shows_scraper.py` — Core scraping module. Two scraping paths:
-  - `GetGBHDownloads`/`GetGBHLinks`/`GetGBHShowInfo` for GBH-hosted shows (jazz)
-  - `GetCRBDownloads` for WCRB/classicalwcrb.org shows (in concert, BSO)
+  - `get_gbh_downloads`/`get_gbh_links`/`get_gbh_show_info` for GBH-hosted shows (jazz)
+  - `get_crb_downloads` for WCRB/classicalwcrb.org shows (in concert, BSO)
+- `feed_utils.py` — Shared helpers (`write_feed`, `add_entries`) used by all feed modules.
 - `*_feed.py` — Each feed module creates a `FeedGenerator`, calls the appropriate scraper, builds feed entries, and writes RSS/ATOM XML files to `feeds/`.
 - `feeds/` — Output directory for generated XML files, synced to S3 bucket `gbh-feed`.
 
-Feed generators can be called as functions (with optional file path args) or run as standalone scripts. The scraper uses `__import__('latest_shows_scraper')` for module loading.
+Feed generators can be called as functions (with optional file path args) or run as standalone scripts.
 
 ## Key Details
 
