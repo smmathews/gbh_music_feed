@@ -1,4 +1,5 @@
 import requests, re
+from datetime import datetime, timezone
 from bs4 import BeautifulSoup
 
 
@@ -6,6 +7,38 @@ def _create_session():
     session = requests.Session()
     session.headers.update({'User-Agent': 'Custom user agent'})
     return session
+
+
+def get_og_info(link):
+    """og:image / og:title for any GBH or CRB page."""
+    with _create_session() as session:
+        html_text = session.get(link).text
+        soup = BeautifulSoup(html_text, 'html.parser')
+        og_image = soup.find('meta', attrs={"property": "og:image"})
+        og_title = soup.find('meta', attrs={"property": "og:title"})
+        return {
+            "image": og_image.attrs["content"] if og_image else None,
+            "title": og_title.attrs["content"] if og_title else None,
+        }
+
+
+def get_crb_show_info(link):
+    with _create_session() as session:
+        html_text = session.get(link).text
+        soup = BeautifulSoup(html_text, 'html.parser')
+        og_image = soup.find('meta', attrs={"property": "og:image"})
+        image = og_image.attrs["content"] if og_image else None
+        if not image:
+            # Some show pages (e.g. In Concert) have no og:image; fall back
+            # to the featured episode's promo photo so the feed has artwork.
+            promo = soup.find('ps-promo', attrs={"data-content-type": "episodic-radio-episode"})
+            promo_img = promo.find('img', attrs={"class": "Image"}) if promo else None
+            image = promo_img.attrs["src"] if promo_img else None
+        og_title = soup.find('meta', attrs={"property": "og:title"})
+        return {
+            "image": image,
+            "title": og_title.attrs["content"] if og_title else None,
+        }
 
 
 def get_gbh_show_info(link):
@@ -76,5 +109,13 @@ def get_crb_downloads(link):
                 download = download.attrs["data-stream-url"]
                 title = performance.find('a', attrs={"class": "Link"})['aria-label']
                 href = performance.find('a', attrs={"class": "Link"})['href']
-                performances.append({'title': title, 'href': href, 'download': download})
+                entry = {'title': title, 'href': href, 'download': download}
+                timestamp = performance.find(attrs={"class": "PromoA-timestamp"})
+                if timestamp and timestamp.attrs.get("data-timestamp"):
+                    entry['published'] = datetime.fromtimestamp(
+                        int(timestamp.attrs["data-timestamp"]) / 1000, tz=timezone.utc)
+                description = performance.find(attrs={"class": "PromoA-description"})
+                if description:
+                    entry['summary'] = description.get_text(strip=True)
+                performances.append(entry)
         return performances
