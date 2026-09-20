@@ -13,7 +13,14 @@ def get_gbh_show_info(link):
         html_text = session.get(link).text
         soup = BeautifulSoup(html_text, 'html.parser')
         img = soup.find('img', attrs={"class": "Image"})
-        return {"image": img.attrs["src"], "title": img.attrs["alt"]}
+        # The show logo is lazy-loaded: `src` is a placeholder data URI and the
+        # real image URL lives in `data-src`. The show title comes from the
+        # og:title meta tag; the img `alt` is now a bare file name, not a title.
+        title_tag = soup.find('meta', attrs={"property": "og:title"})
+        return {
+            "image": img.attrs.get("data-src") or img.attrs["src"],
+            "title": title_tag.attrs["content"] if title_tag else img.attrs["alt"],
+        }
 
 
 def get_gbh_links(link):
@@ -21,10 +28,15 @@ def get_gbh_links(link):
         html_text = session.get(link).text
         soup = BeautifulSoup(html_text, 'html.parser')
         performances = []
-        for performance in soup.find_all('a', attrs={"class": "title-link"}):
+        # Episode promos link to detail pages like /shows/<show>/<episode>.
+        # The old "title-link" class no longer exists; links are now a.Link
+        # anchors. Filter on the href shape so nav links (e.g. /tv-shows) and
+        # the show's own landing-page link are excluded, while episodes that
+        # GBH cross-links from classical-crb-app-content are still included.
+        for performance in soup.find_all('a', attrs={"class": "Link", "href": re.compile(r'/shows/[^/]+/.+')}):
             title = performance.text
             pretty_date = title
-            if ":" in title:
+            if ": " in title:
                 pretty_date = title.split(": ", 1)[1]
             else:
                 title = "GBH Music's Jazz on 89.7: " + pretty_date
@@ -41,7 +53,9 @@ def get_gbh_downloads(link):
             soup = BeautifulSoup(html_text, 'html.parser')
             download = soup.find('button', attrs={"data-stream-url": re.compile('.*cdn.*mp3')})
             if download:
-                performance.update({'download': download.attrs["data-src"]})
+                # Read the attribute that was actually matched; a button may
+                # only carry data-stream-url, and data-src is not guaranteed.
+                performance.update({'download': download.attrs["data-stream-url"]})
             else:
                 download = soup.find('ps-stream-url', attrs={"data-stream-url": re.compile('.*cdn.*mp3')})
                 if download:
