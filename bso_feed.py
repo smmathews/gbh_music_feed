@@ -10,7 +10,9 @@ def generate_bso_feed(rss_file=None, atom_file=None):
     fg.link(href=link)
     fg.load_extension('podcast')
     fg.title("WCRB Boston Symphony Orchestra")
-    # TODO: get logo from show
+    info = latest_shows_scraper.get_crb_show_info(link)
+    if info["image"]:
+        fg.logo(info["image"])
     fg.subtitle(
         'CRB brings you performances, live from Symphony Hall, with host Brian McCreath, Saturdays at 8pm, with repeat broadcasts on Mondays at 8pm.')  # TODO: scrape this, in case it changes
     fg.language('en')

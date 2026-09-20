@@ -4,8 +4,10 @@ These pin the parsing behavior with canned HTML (no network), so they catch
 regressions in the scrapers even when the live sites are unreachable.
 """
 import unittest
+from datetime import datetime, timezone
 from unittest.mock import patch
 
+import combined_feed
 import latest_shows_scraper
 
 
@@ -182,6 +184,154 @@ class TestGetCrbDownloads(unittest.TestCase):
         self.assertEqual(len(performances), 1)
         self.assertEqual(performances[0]['title'], 'Encore: Mahler’s Fourth')
         self.assertEqual(performances[0]['download'], 'https://cpa.ds.npr.org/s1142/audio/2025/09/bso.mp3')
+
+    def test_extracts_timestamp_and_description(self):
+        """Issue #3: PromoA-timestamp / PromoA-description become the entry's
+        published datetime and summary."""
+        crb_url = "https://www.classicalwcrb.org/show/the-boston-symphony-orchestra"
+        html = (
+            '<html><body>'
+            '<ps-promo data-content-type="episodic-radio-episode">'
+            '<ps-stream-url data-stream-format="audio/mpeg" '
+            'data-stream-url="https://cpa.ds.npr.org/s1142/audio/2025/09/bso.mp3"></ps-stream-url>'
+            '<a class="Link" aria-label="Encore: Mahler’s Fourth" '
+            'href="https://www.classicalwcrb.org/show/the-boston-symphony-orchestra/2025-09-09/mahler"></a>'
+            '<div class="PromoA-date"><div class="PromoA-timestamp" '
+            'data-date="September 12, 2026 at 8:00 PM EDT" '
+            'data-promo-date="September 12, 2026" data-timestamp="1789257600000"></div></div>'
+            '<div class="PromoA-description">'
+            '  In an encore broadcast, Andris Nelsons leads the BSO in Mahler’s Fourth. '
+            '</div>'
+            '</ps-promo>'
+            '<ps-promo data-content-type="episodic-radio-episode">'
+            '<ps-stream-url data-stream-format="audio/mpeg" '
+            'data-stream-url="https://cpa.ds.npr.org/s1142/audio/2025/09/other.mp3"></ps-stream-url>'
+            '<a class="Link" aria-label="No metadata promo" '
+            'href="https://www.classicalwcrb.org/show/the-boston-symphony-orchestra/2025-09-10/other"></a>'
+            '</ps-promo>'
+            '</body></html>'
+        )
+        with patched({crb_url: html}):
+            performances = latest_shows_scraper.get_crb_downloads(crb_url)
+        self.assertEqual(len(performances), 2)
+        # 1789257600000 ms == 2026-09-13 00:00 UTC == Sept 12, 2026 8:00 PM EDT
+        self.assertEqual(performances[0]['published'],
+                         datetime(2026, 9, 13, tzinfo=timezone.utc))
+        self.assertEqual(
+            performances[0]['summary'],
+            'In an encore broadcast, Andris Nelsons leads the BSO in Mahler’s Fourth.')
+        # Promos without timestamp/description simply lack the keys.
+        self.assertNotIn('published', performances[1])
+        self.assertNotIn('summary', performances[1])
+
+
+class TestGetCrbShowInfo(unittest.TestCase):
+    def test_uses_og_image_and_og_title(self):
+        """Issue #2: CRB feeds need a per-show logo; og:image provides one."""
+        crb_url = "https://www.classicalwcrb.org/show/the-boston-symphony-orchestra"
+        html = (
+            '<html><head>'
+            '<meta property="og:image" content="https://cdn.example.com/bso-banner.png">'
+            '<meta property="og:title" content="The Boston Symphony Orchestra">'
+            '</head><body></body></html>'
+        )
+        with patched({crb_url: html}):
+            info = latest_shows_scraper.get_crb_show_info(crb_url)
+        self.assertEqual(info, {"image": "https://cdn.example.com/bso-banner.png",
+                                "title": "The Boston Symphony Orchestra"})
+
+    def test_falls_back_to_promo_photo_without_og_image(self):
+        """Issue #2: the In Concert page has no og:image; fall back to the
+        featured episode's promo photo."""
+        crb_url = "https://www.classicalwcrb.org/show/upcoming-in-concert-broadcasts"
+        html = (
+            '<html><head><meta property="og:title" content="In Concert"></head><body>'
+            '<ps-promo data-content-type="episodic-radio-episode">'
+            '<img class="Image" alt="Ensemble photo" '
+            'src="https://cdn.example.com/promo-photo.png">'
+            '</ps-promo>'
+            '</body></html>'
+        )
+        with patched({crb_url: html}):
+            info = latest_shows_scraper.get_crb_show_info(crb_url)
+        self.assertEqual(info["image"], "https://cdn.example.com/promo-photo.png")
+        self.assertEqual(info["title"], "In Concert")
+
+    def test_get_og_info_reads_any_page(self):
+        url = "https://www.wgbh.org/music"
+        html = (
+            '<html><head>'
+            '<meta property="og:image" content="https://cdn.example.com/gbh-music.jpg">'
+            '<meta property="og:title" content="GBH Music">'
+            '</head><body></body></html>'
+        )
+        with patched({url: html}):
+            info = latest_shows_scraper.get_og_info(url)
+        self.assertEqual(info, {"image": "https://cdn.example.com/gbh-music.jpg",
+                                "title": "GBH Music"})
+
+
+class TestCombinedFeed(unittest.TestCase):
+    def test_merges_dedupes_and_sorts_by_published(self):
+        """Issue #1: entries from multiple shows merge into one feed,
+        de-duplicated by href and sorted newest-first."""
+        def jazz_scraper(link):
+            return [{'title': 'Jazz Episode', 'href': 'https://x/jazz-1',
+                     'download': 'https://cdn.example.com/jazz-1.mp3'}]
+
+        def classical_scraper(link):
+            shows = {
+                'bso': ([{'title': 'Old BSO Episode', 'href': 'https://x/bso-1',
+                          'download': 'https://cdn.example.com/bso-1.mp3',
+                          'published': datetime(2026, 1, 1, tzinfo=timezone.utc),
+                          'summary': 'An old episode'},
+                         {'title': 'Duplicate', 'href': 'https://x/dup',
+                          'download': 'https://cdn.example.com/dup.mp3',
+                          'published': datetime(2026, 2, 1, tzinfo=timezone.utc)}]),
+                'ic': ([{'title': 'New In Concert Episode', 'href': 'https://x/ic-1',
+                         'download': 'https://cdn.example.com/ic-1.mp3',
+                         'published': datetime(2026, 3, 1, tzinfo=timezone.utc)},
+                        {'title': 'Duplicate', 'href': 'https://x/dup',
+                         'download': 'https://cdn.example.com/dup.mp3',
+                         'published': datetime(2026, 2, 1, tzinfo=timezone.utc)}]),
+            }
+            return shows['bso'] if link.endswith('/bso') else shows['ic']
+
+        result = combined_feed.generate_combined_feed(
+            "Test Combined", "https://example.com/all", "desc",
+            [('https://x/bso', classical_scraper),
+             ('https://x/ic', classical_scraper),
+             ('https://x/jazz', jazz_scraper)],
+            atom_file="/tmp/test_combined_atom.xml", rss_file="/tmp/test_combined_rss.xml")
+        if isinstance(result, bytes):
+            result = result.decode()
+        self.assertIn('<entry>', result)
+        titles = [t for t in result.split('<title>')[1:]]
+        entry_titles = [t.split('</title>')[0] for t in titles[1:]]  # skip feed title
+        # newest first; the duplicate href appears once
+        self.assertEqual(entry_titles,
+                         ['New In Concert Episode', 'Duplicate', 'Old BSO Episode', 'Jazz Episode'])
+
+    def test_combined_feed_output_has_pubdate_and_description(self):
+        """Issue #3 propagation: published/summary land in RSS pubDate and
+        description."""
+        def scraper(link):
+            return [{'title': 'Encore: Mahler', 'href': 'https://x/mahler',
+                     'download': 'https://cdn.example.com/mahler.mp3',
+                     'published': datetime(2026, 9, 13, tzinfo=timezone.utc),
+                     'summary': 'Nelsons conducts Mahler’s Fourth.'}]
+
+        with patched({"https://x": (
+                '<html><head><meta property="og:image" '
+                'content="https://cdn.example.com/all-art.jpg"></head><body></body></html>')}):
+            combined_feed.generate_combined_feed(
+                "Test Combined", "https://x", "desc", [('https://x/bso', scraper)],
+                rss_file="/tmp/test_combined2_rss.xml")
+        import xml.etree.ElementTree as ET
+        root = ET.parse('/tmp/test_combined2_rss.xml').getroot()
+        item = root.find('.//item')
+        self.assertEqual(item.find('pubDate').text, 'Sun, 13 Sep 2026 00:00:00 +0000')
+        self.assertEqual(item.find('description').text, 'Nelsons conducts Mahler’s Fourth.')
 
 
 if __name__ == '__main__':

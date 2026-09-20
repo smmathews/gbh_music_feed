@@ -11,6 +11,10 @@ Three feeds are generated:
 - **WCRB In Concert** (`in_concert_feed.py`) — scrapes CRB site using `get_crb_downloads`
 - **WCRB BSO** (`bso_feed.py`) — scrapes CRB site using `get_crb_downloads`
 
+Two combined feeds are also generated (`combined_feed.py`):
+- **GBH Music: All Shows** (`all_gbh_music`) — jazz + in concert + BSO
+- **WCRB Classical: All Shows** (`all_classical`) — in concert + BSO
+
 ## Commands
 
 ```bash
@@ -48,5 +52,5 @@ Feed generators can be called as functions (with optional file path args) or run
 ## Key Details
 
 - GBH scraper looks for download URLs matching `.*cdn.*mp3` in `data-stream-url` attributes, with a fallback from `<button>` to `<ps-stream-url>` elements.
-- CRB scraper finds `<ps-promo>` elements with `data-content-type="episodic-radio-episode"` and extracts `audio/mpeg` stream URLs.
-- Tests are integration tests that make real HTTP requests to the radio station websites — they will fail if the sites are down or change structure.
+- CRB scraper finds `<ps-promo>` elements with `data-content-type="episodic-radio-episode"` and extracts `audio/mpeg` stream URLs, plus each promo's `PromoA-timestamp`/`PromoA-description` for the entry date and description.
+- Tests are integration tests that make real HTTP requests to the radio station websites — they will fail if the sites are down or change structure. `test_scraper_offline.py` covers parsing with canned HTML and runs offline.
